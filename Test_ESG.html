@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Final_NAC</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <!-- Load color scale -->
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+    <style>
+        body {
+            margin:0;
+            padding:0;
+            font-family: sans-serif;
+        }
+        a, a:hover, a:visited {
+            color: '#0071bc';
+        }
+
+
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+            z-index: 100;
+        }
+
+        #my_dataviz {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            background-color: white;
+        }
+        #buttons1 {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            background-color: white;
+        }
+        #buttons2 {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            background-color: white;
+        }
+
+        .path {
+
+          stroke: #fff;
+          stroke-width: .5;
+          stroke-dasharray: 1;
+          fill: #afafaf;
+
+        }
+        #tooltip.hidden{
+          display: none;
+        }
+
+        #tooltip {
+          position: absolute;
+          text-align: center;
+          padding: 2px;
+          font: 12px sans-serif;
+          background: #fff;
+          border: 0px;
+          border-radius: 8px;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+
+
+        .bubbles {
+          stroke-width: 2px;
+          stroke: white;
+        }
+        .bubbles:hover {
+          stroke: black;
+        }
+        .text-anchor {
+          font-family : Arial;
+          font-size: 8px;
+
+
+        }
+
+
+        button {
+        display: inline-block;
+        height: 80px;
+        padding: 0;
+        margin: 0;
+        vertical-align: top;
+        width: 80px;
+        background-color: white;
+        border: 2px solid #fff;
+        }
+        .column_left{
+          float: left;
+          width: 25%;
+          text-align: center;
+        }
+        .column_center{
+          float: left;
+          width: 50%;
+          text-align: center;
+        }
+        .column_right{
+          float: right;
+          width: 25%;
+          text-align: left;
+        }
+        #intro{
+          width: 100%-10vh;
+          min-height: 5vh;
+          padding-top: 5vh;
+          padding-bottom: 5vh;
+          padding-right: : 5vh;
+          padding-left: 5vh;
+          text-align: left;
+          line-height: 25px;
+          font-size: 16px;
+          background-color: white;
+        }
+        #footer{
+          width: 100%-10vh;
+          min-height: 5vh;
+          padding-top: 5vh;
+          padding-bottom: 5vh;
+          padding-right: : 5vh;
+          padding-left: 5vh;
+          text-align: left;
+          line-height: 25px;
+          font-size: 16px;
+          background-color: white;
+        }
+
+        </style>
+</head>
+<body>
+
+    <!-- Divs for D3 interactive part  -->
+
+    <div id="intro">
+      <p><b>Want to learn more? Play with the bubble chart and map below.</b></p>
+      <p>This tool can be used to identify communities and indicators that should be prioritized to overcome this crisis without leaving anyone behind.</p>
+      <p>By clicking on the <b><span style="color:#fdd58b;">Eat</span>, <span style="color:#80a592;">Play</span>, <span style="color:#90a5b6;">Learn</span></b> icons, you can select which data to show in the bubble chart. You can also set the different races, and the color saturation will change according to the percentage of people of that race in each census tract.</p>
+      <p>If you hover over the bubbles or the map, census information will be shown on the top right. The neighborhood that you are selecting will be highlighted and will also allow you to explore disparities within the neighborhoods.</p>
+      <p>Finally, if you want to see the data for just one borough, you can hover over each borough's names in the legend.</p>
+    </div>
+
+
+    <div class = "row">
+      <div class="column_left">
+        <p><b> Show results</b></p>
+        <button id="jobs">Jobs access</button>
+        <button id="shopping">Shopping access</button>
+        <button id="healthcare">Healthcare access</button>
+      </div>
+      <div class="column_center">
+        <p><b> Race (Opacity shows the relative % of the race in each census tract) </b></p>
+        <button id="White">White</button>
+        <button id="Black">Black</button>
+        <button id="Asian">Asian</button>
+        <button id="Other">Other</button>
+        <button id="Twoormore">Two or more</button>
+        <button id="Native">Native</button>
+        <button id="Islander">Islander</button>
+        <button id="Reset">Reset</button>
+      </div>
+      <div id = "tt" class="column_right">
+      </div>
+    </div>
+
+
+    <div id="my_dataviz"></div>
+
+
+    <div id="footer">
+      <p>Learn more about the data sources and methods here </a> </b></p>
+    </div>
+
+
+
+    <script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 20, bottom: 30, left: 50},
+        width = 800 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+
+    // X axis
+    var x = d3.scaleLinear()
+      .domain([0, 1])
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    svg.append("text")
+        .attr("transform",
+              "translate(" + (width/2) + " ," +
+                             (height + margin.top + 20) + ")")
+        .style("text-anchor", "middle")
+        .text("Social Vulnerability Index");
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, 100])
+      .range([ height, 0]);
+    svg.append("text")
+      .attr("class", "ylabel")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Jobs access percentage");
+    svg.append("g")
+       .call(d3.axisLeft(y));
+
+    //Boroughs and Colors
+    //var allgroups = ["Manhattan", "Bronx", "Brooklyn", "Queens", "Staten Island"]
+    //var myColor = d3.scaleOrdinal()
+      //.domain(allgroups)
+      //.range(d3.schemeSet2);
+
+    // Add a scale for bubble size
+    var z = d3.scaleLinear()
+      .domain([0, 5000])
+      .range([ 5, 50]);
+
+    //Read the data
+    d3.json("https://NaroaCS.github.io/Data/new_combined_CAL.geojson", function(data) {
+      console.log(data)
+
+      // Add a scale for bubble color
+      //svg.append('g')
+      svg.selectAll("dot")
+        .data(data.features)
+        .enter().append("circle")
+        .attr("class", function(d,i) { return "bubbles" + i; })
+        .attr("cx", function (d) { return x(d.properties.SVI_total*100); } )
+        .attr("cy", function (d) { return y(d.properties.jobs_access_pct*100); } )
+        .attr("r", function (d) { return z(d.properties.Total_pop/5); } )
+        .style("fill", "#69b3a2" )
+        .style("opacity", 0.75)
+        .on("mouseover", showTooltip )
+        .on("mousemove", moveTooltip )
+        .on("mouseleave", hideTooltip )
+      });
+
+      // Append a svg object to the body for map
+      var svg3 = d3.select("#my_dataviz")
+        .append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+      //Projection
+      var albersProjection = d3.geoAlbers()
+                               .scale(10000)
+                               .rotate([122.1438, 0])
+                               .center([0, 37.438])
+                               .translate([width/2, height/2])
+      var path = d3.geoPath()
+                     .projection(albersProjection)
+
+    // Loading data and map generation
+    d3.json("https://NaroaCS.github.io/Data/new_combined_CAL.geojson", function(data) {
+      console.log(data)
+      svg3.selectAll("path")
+         .data(data.features)
+         .enter().append("path")
+         .attr("class", function(d,i) { return "mappath" + i;})
+         .attr("d", path)
+         .style("fill", "#69b3a2" )
+         //.style("fill", function(d) { return myColor(d.properties.boro_name.replaceAll("\\s", ""));}) // or d.properties.Perc_white
+         .style('stroke','lightgray')
+         .on("mouseover", showTooltip )
+         .on("mousemove", moveTooltip )
+         .on("mouseleave", hideTooltip )
+    });
+
+
+    // Update Chart after clicking the Eat, Learn, Play buttons
+    function updateChart(selected){
+
+      svg.selectAll("circle")
+        .transition()
+        .duration(5000)
+        //Update data
+        .attr("cy", function (d) {
+          if(selected == "jobs"){return y(d.properties.jobs_access_pct*100);}
+          else if(selected == "shopping")  {return y(d.properties.shopping_access_pct*100);}
+          else if(selected == "healthcare") {return y(d.properties.healthcare_access_pct*100);}
+        });
+      //Update y axis
+      d3.select(".ylabel")
+        .text(function (d){
+          if(selected == "jobs"){return "Jobs access percentage";}
+          else if(selected == "shopping")  {return "Shopping access percentage";}
+          else if(selected == "healthcare") {return "Healthcare access percentage";}
+      });
+    }
+
+    // Update Race after clicking the race buttons
+    function updateRace(race){
+
+      // Updating Bubble Chart
+      svg.selectAll("circle")
+         .transition()
+         .duration(1000)
+         //Update opacity of bubbles
+         .style("opacity",function(d){
+                if(race=='White'){
+                if (d.properties.Perc_white=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_white/100};
+                return opacity;
+              }
+              else if(race=='Black'){
+                if (d.properties.Perc_black_afam=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_black_afam/60};
+                return opacity;
+              }
+              else if(race=='Asian'){
+                if (d.properties.Perc_asian=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_asian/82};
+                return opacity;
+              }
+              else if(race=='Islander'){
+                if (d.properties.Perc_hawaii_pi=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_hawaii_pi/12};
+                //these divisions (such as 6.6 here)  are the maximum in the data and is used to normalize it, otherwise for some races it would all be white
+                return opacity;
+              }
+              else if(race=='Native'){
+                if (d.properties.Perc_amindian_alnative=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_amindian_alnative/6};
+                return opacity;
+              }
+              else if(race=='Twoormore'){
+                if (d.properties.Perc_two_or_more=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_two_or_more/5};
+                return opacity;
+              }
+              else if(race=='Other'){
+                if (d.properties.Perc_other_race=='nan'){opacity=0}
+                else {opacity= d.properties.Perc_other_race/68};
+                return opacity;
+              }
+              else if(race=='reset'){return 0.75;}
+              else { return 0.75;}
+            })
+
+          // Updating Map
+          svg3.selectAll("path")
+            .transition()
+            .duration(1000)
+            //Update opacity of map census tracts
+            .style("opacity",function(d){
+                   if(race=='White'){
+                   if (d.properties.Perc_white=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_white/100};
+                   return opacity;
+                 }
+                 else if(race=='Black'){
+                   if (d.properties.Perc_black_afam=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_black_afam/60};
+                   return opacity;
+                 }
+                 else if(race=='Asian'){
+                   if (d.properties.Perc_asian=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_asian/82};
+                   return opacity;
+                 }
+                 else if(race=='Islander'){
+                   if (d.properties.Perc_hawaii_pi=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_hawaii_pi/12};
+                   //these divisions (such as 6.6 here)  are the maximum in the data and is used to normalize it, otherwise for some races it would all be white
+                   return opacity;
+                 }
+                 else if(race=='Native'){
+                   if (d.properties.Perc_amindian_alnative=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_amindian_alnative/6};
+                   return opacity;
+                 }
+                 else if(race=='Twoormore'){
+                   if (d.properties.Perc_two_or_more=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_two_or_more/5};
+                   return opacity;
+                 }
+                 else if(race=='Other'){
+                   if (d.properties.Perc_other_race=='nan'){opacity=0}
+                   else {opacity= d.properties.Perc_other_race/68};
+                   return opacity;
+                 }
+                 else if(race=='reset'){return 0.75;}
+                 else { return 0.75;}
+               });
+    }
+
+    // The scale you use for bubble size
+    var size = d3.scaleSqrt()
+      .domain([0, 5000])  // What's in the data, let's say it is percentage
+      .range([4, 40])  // Size in pixel
+
+    // Add legend: circles
+    /*var valuesToShow = [100, 1000, 5000]
+    var xCircle = 130
+    var xLabel = 200
+    var yCircle = 100
+    var svg2 = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width/2)
+        .attr("height", height)
+    svg2.append("text")
+      .attr('x', xCircle)
+      .attr('y', 14)
+      .text("Number of youth in each census tract")
+      .attr('font-size', '12px')
+      .attr('text-anchor', 'middle')
+
+    svg2.selectAll("legend")
+      .data(valuesToShow)
+      .enter()
+      .append("circle")
+        .attr("cx", xCircle)
+        .attr("cy", function(d){ return yCircle - size(d) } )
+        .attr("r", function(d){ return size(d) })
+        .style("fill", "none")
+        .attr("stroke", "black")
+
+    // Add legend: segments
+    svg2.selectAll("legend")
+      .data(valuesToShow)
+      .enter()
+      .append("line")
+        .attr('x1', function(d){ return xCircle + size(d) } )
+        .attr('x2', xLabel)
+        .attr('y1', function(d){ return yCircle - size(d) } )
+        .attr('y2', function(d){ return yCircle - size(d) } )
+        .attr('stroke', 'black')
+        .style('stroke-dasharray', ('2,2'))
+
+    // Add legend: labels
+    svg2.selectAll("legend")
+      .data(valuesToShow)
+      .enter()
+      .append("text")
+        .attr('x', xLabel)
+        .attr('y', function(d){ return yCircle - size(d) } )
+        .text( function(d){ return d } )
+        .style("font-size", 10)
+        .attr('alignment-baseline', 'middle');
+
+        // What to do when one group is hovered
+    /*var highlight = function(d){
+      d3.selectAll(".bubbles").style("opacity", .05)
+      d3.selectAll("."+d.replace(" ", "_")).style("opacity", 0.75);
+    }
+      // And when it is not hovered anymore
+    var noHighlight = function(d){
+      d3.selectAll(".bubbles").style("opacity", 0.75)
+    }
+
+    // Add one dot in the legend for each name.
+    /*var size = 20
+    svg2.selectAll("myrect")
+      .data(allgroups)
+      .enter()
+      .append("circle")
+        .attr("cx", xCircle-50)
+        .attr("cy", function(d,i){ return yCircle +50 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+        .attr("r", 7)
+        .style("fill", function(d){ return myColor(d)})
+        .on("mouseover", highlight)
+        .on("mouseleave", noHighlight);
+
+    // Add labels beside legend dots
+    svg2.selectAll("mylabels")
+      .data(allgroups)
+      .enter()
+      .append("text")
+        .attr("x", xCircle-50 + size*.8)
+        .attr("y", function(d,i){ return yCircle+50 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+        .style("fill", function(d){ return myColor(d)})
+        .text(function(d){ return d})
+        .attr("text-anchor", "left")
+        .style("alignment-baseline", "middle")
+        .on("mouseover", highlight)
+        .on("mouseleave", noHighlight);*/
+
+      //Calling update functions when an Eat, Learn, Play button in selected
+      d3.select("#jobs").on("click", function() {
+        console.log("jobs")
+        updateChart("jobs");
+      });
+      d3.select("#shopping").on("click", function() {
+        console.log("shopping")
+        updateChart("shopping");
+      });
+      d3.select("#healthcare").on("click", function() {
+        console.log("healthcare")
+        updateChart("healthcare");
+      });
+
+      //Calling update functions when a Race button is selected
+      d3.select("#White").on("click", function() {
+        updateRace('White');
+      });
+      d3.select("#Black").on("click", function() {
+        updateRace('Black');
+      });
+      d3.select("#Asian").on("click", function() {
+        updateRace('Asian');
+      });
+      d3.select("#Islander").on("click", function() {
+        updateRace('Islander');
+      });
+      d3.select("#Native").on("click", function(){
+        updateRace('Native');
+      })
+      d3.select("#Twoormore").on("click", function(){
+        updateRace('Twoormore');
+      })
+      d3.select("#Other").on("click", function(){
+        updateRace('Other');
+      })
+      d3.select("#Reset").on("click", function(){
+        updateRace('Reset');
+      })
+
+    // Create a tooltip div that is hidden by default:
+    var tooltip = d3.select("#tt")
+      .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("color", "black")
+
+
+    //Move to front function
+    d3.selection.prototype.moveToFront = function() {
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
+
+    //Definition of tooltip functions
+    var showTooltip = function(d,i) {
+
+      //Selects and hihlights the census tracts of the same ntacode in the bubble chart and map
+
+      //var sel = d3.select(this);
+      //sel.style('stroke','black').moveToFront();
+
+      svg.selectAll("circle.bubbles" + i).style('stroke','black').moveToFront();
+
+
+      svg3.selectAll("path.mappath" + i).style('stroke','black').style("stroke-width", 2).moveToFront();
+
+
+      //var sel = d3.select(this);
+      //sel.style('stroke','black').style("stroke-width", 2).moveToFront();
+
+      //svg3.selectAll(d.properties.Total_pop).style('stroke','black').style("stroke-width", 2).moveToFront();
+
+      //Definition of the poupup message
+      tooltip.style("opacity", 1)
+             .html("<b>"
+                    //+ d.properties.ntaname
+                   //+ "," +d.properties.boro_name +"</b><br>"
+                   + "White:" + d.properties.Perc_white+"%<br>"
+                   + "Black:" + d.properties.Perc_black_afam+"%<br>"
+                   + "Asian:" + d.properties.Perc_asian+"%<br>"
+                   + "Other:" + d.properties.Perc_other_race+"%<br>"
+                   + "Two or more:" + d.properties.Perc_two_or_more+"%<br>"
+                   + "Native:" + d.properties.Perc_amindian_alnative+"%<br>"
+                   + "Islander:" + d.properties.Perc_hawaii_pi+"%<br>"
+                 )
+             .style("font-size","11px")
+             .style("background","#fafafa")
+             .style("left", (d3.mouse(this)[0]+30) + "px")
+             .style("top", (d3.mouse(this)[1]+30) + "px");
+
+    }
+
+    //Moving tooltip
+    var moveTooltip = function(d) {
+      tooltip.style("left", (d3.mouse(this)[0]+30) + "px")
+             .style("top", (d3.mouse(this)[1]+30) + "px")
+    }
+
+    //Setting back the default parameters
+    var hideTooltip = function(d,i) {
+      svg.selectAll("circle.bubbles" + i).style('stroke','lightgray').style("stroke-width", 1);
+      svg3.selectAll("path.mappath" + i).style('stroke','lightgray').style("stroke-width", 1);
+      //var sel = d3.select(this);
+      //sel.style('stroke','white');
+      //sel.style('stroke','lightgray').style("stroke-width", 1);
+      tooltip.style("opacity", 0)
+    }
+
+    </script>
+
+
+</body>
+</html>
