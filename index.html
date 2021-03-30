@@ -335,12 +335,12 @@
          .style("opacity",function(d){
                 if(race=='White'){
                 if (d.properties.Perc_white=='nan'){opacity=0}
-                else {opacity= d.properties.Perc_white/100};
+                else {opacity= d.properties.Perc_white/97.9};
                 return opacity;
               }
               else if(race=='Black'){
                 if (d.properties.Perc_black_afam=='nan'){opacity=0}
-                else {opacity= d.properties.Perc_black_afam/60};
+                else {opacity= d.properties.Perc_black_afam/40};
                 return opacity;
               }
               else if(race=='Asian'){
@@ -350,23 +350,23 @@
               }
               else if(race=='Islander'){
                 if (d.properties.Perc_hawaii_pi=='nan'){opacity=0}
-                else {opacity= d.properties.Perc_hawaii_pi/12};
+                else {opacity= d.properties.Perc_hawaii_pi/10};
                 //these divisions (such as 6.6 here)  are the maximum in the data and is used to normalize it, otherwise for some races it would all be white
                 return opacity;
               }
               else if(race=='Native'){
                 if (d.properties.Perc_amindian_alnative=='nan'){opacity=0}
-                else {opacity= d.properties.Perc_amindian_alnative/6};
+                else {opacity= d.properties.Perc_amindian_alnative/26};
                 return opacity;
               }
               else if(race=='Twoormore'){
                 if (d.properties.Perc_two_or_more=='nan'){opacity=0}
-                else {opacity= d.properties.Perc_two_or_more/5};
+                else {opacity= d.properties.Perc_two_or_more/14};
                 return opacity;
               }
               else if(race=='Other'){
                 if (d.properties.Perc_other_race=='nan'){opacity=0}
-                else {opacity= d.properties.Perc_other_race/68};
+                else {opacity= d.properties.Perc_other_race/60};
                 return opacity;
               }
               else if(race=='reset'){return 0.75;}
@@ -379,44 +379,44 @@
             .duration(1000)
             //Update opacity of map census tracts
             .style("opacity",function(d){
-                   if(race=='White'){
-                   if (d.properties.Perc_white=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_white/100};
-                   return opacity;
-                 }
-                 else if(race=='Black'){
-                   if (d.properties.Perc_black_afam=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_black_afam/60};
-                   return opacity;
-                 }
-                 else if(race=='Asian'){
-                   if (d.properties.Perc_asian=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_asian/82};
-                   return opacity;
-                 }
-                 else if(race=='Islander'){
-                   if (d.properties.Perc_hawaii_pi=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_hawaii_pi/12};
-                   //these divisions (such as 6.6 here)  are the maximum in the data and is used to normalize it, otherwise for some races it would all be white
-                   return opacity;
-                 }
-                 else if(race=='Native'){
-                   if (d.properties.Perc_amindian_alnative=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_amindian_alnative/6};
-                   return opacity;
-                 }
-                 else if(race=='Twoormore'){
-                   if (d.properties.Perc_two_or_more=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_two_or_more/5};
-                   return opacity;
-                 }
-                 else if(race=='Other'){
-                   if (d.properties.Perc_other_race=='nan'){opacity=0}
-                   else {opacity= d.properties.Perc_other_race/68};
-                   return opacity;
-                 }
-                 else if(race=='reset'){return 0.75;}
-                 else { return 0.75;}
+              if(race=='White'){
+              if (d.properties.Perc_white=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_white/97.9};
+              return opacity;
+            }
+            else if(race=='Black'){
+              if (d.properties.Perc_black_afam=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_black_afam/40};
+              return opacity;
+            }
+            else if(race=='Asian'){
+              if (d.properties.Perc_asian=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_asian/82};
+              return opacity;
+            }
+            else if(race=='Islander'){
+              if (d.properties.Perc_hawaii_pi=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_hawaii_pi/10};
+              //these divisions (such as 6.6 here)  are the maximum in the data and is used to normalize it, otherwise for some races it would all be white
+              return opacity;
+            }
+            else if(race=='Native'){
+              if (d.properties.Perc_amindian_alnative=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_amindian_alnative/26};
+              return opacity;
+            }
+            else if(race=='Twoormore'){
+              if (d.properties.Perc_two_or_more=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_two_or_more/14};
+              return opacity;
+            }
+            else if(race=='Other'){
+              if (d.properties.Perc_other_race=='nan'){opacity=0}
+              else {opacity= d.properties.Perc_other_race/60};
+              return opacity;
+            }
+            else if(race=='reset'){return 0.75;}
+            else { return 0.75;}
                });
     }
 
