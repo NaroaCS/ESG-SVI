@@ -279,7 +279,7 @@
 
       //Projection
       var albersProjection = d3.geoAlbers()
-                               .scale(10000)
+                               .scale(25000)
                                .rotate([122.1438, 0])
                                .center([0, 37.438])
                                .translate([width/2, height/2])
@@ -287,7 +287,7 @@
                      .projection(albersProjection)
 
     // Loading data and map generation
-    d3.json("https://NaroaCS.github.io/Data/new_combined_CAL.geojson", function(data) {
+    d3.json("https://NaroaCS.github.io/Data/Clipped_CAL_combined.geojson", function(data) {
       console.log(data)
       svg3.selectAll("path")
          .data(data.features)
