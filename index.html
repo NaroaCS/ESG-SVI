@@ -68,6 +68,14 @@
           fill: #afafaf;
 
         }
+        .mappath {
+
+          stroke: #fff;
+          stroke-width: .5;
+          stroke-dasharray: 1;
+          fill: #afafaf;
+
+        }
         #tooltip.hidden{
           display: none;
         }
@@ -252,7 +260,7 @@
       .range([ 5, 50]);
 
     //Read the data
-    d3.json("https://NaroaCS.github.io/Data/new_combined_CAL.geojson", function(data) {
+    d3.json("https://NaroaCS.github.io/Data/clipped_cal.geojson", function(data) {
       console.log(data)
 
       // Add a scale for bubble color
@@ -261,9 +269,9 @@
         .data(data.features)
         .enter().append("circle")
         .attr("class", function(d,i) { return "bubbles" + i; })
-        .attr("cx", function (d) { return x(d.properties.SVI_total*100); } )
+        .attr("cx", function (d) { return x(d.properties.SVI_total); } )
         .attr("cy", function (d) { return y(d.properties.jobs_access_pct*100); } )
-        .attr("r", function (d) { return z(d.properties.Total_pop/5); } )
+        .attr("r", function (d) { return z(d.properties.Total_pop/15); } )
         .style("fill", "#69b3a2" )
         .style("opacity", 0.75)
         .on("mouseover", showTooltip )
@@ -279,7 +287,7 @@
 
       //Projection
       var albersProjection = d3.geoAlbers()
-                               .scale(25000)
+                               .scale(30000)
                                .rotate([122.1438, 0])
                                .center([0, 37.438])
                                .translate([width/2, height/2])
@@ -287,19 +295,17 @@
                      .projection(albersProjection)
 
     // Loading data and map generation
-    d3.json("https://NaroaCS.github.io/Data/Clipped_CAL_combined.geojson", function(data) {
-      console.log(data)
+    d3.json("https://NaroaCS.github.io/Data/new_combined_CAL.geojson", function(data) {
       svg3.selectAll("path")
-         .data(data.features)
-         .enter().append("path")
-         .attr("class", function(d,i) { return "mappath" + i;})
-         .attr("d", path)
-         .style("fill", "#69b3a2" )
-         //.style("fill", function(d) { return myColor(d.properties.boro_name.replaceAll("\\s", ""));}) // or d.properties.Perc_white
-         .style('stroke','lightgray')
-         .on("mouseover", showTooltip )
-         .on("mousemove", moveTooltip )
-         .on("mouseleave", hideTooltip )
+               .data(data.features)
+               .enter().append("path")
+               .attr("class", function(d,i) { return "mappath" +i;})
+               .attr("d", path)
+               .style("fill", "#69b3a2") // or d.properties.Perc_white
+               .style('stroke','lightgray')
+               .on("mouseover", showTooltip )
+               .on("mousemove", moveTooltip )
+               .on("mouseleave", hideTooltip )
     });
 
 
